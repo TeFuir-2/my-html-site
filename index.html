@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <script>
+        var _czc = _czc || [];
+        (function () {
+            var um = document.createElement("script");
+            um.src = "https://v1.cnzz.com/z.js?id=1281334347&async=1";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(um, s);
+        })();
+    </script>
+    <title>寻找小猪🐷/小顾</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1a1a1a;
+            --subtext: #4d4d4d;
+            --border: #e5e5e5;
+            --shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            --shadow-heavy: 0 20px 48px rgba(0, 0, 0, 0.16);
+            --overlay: rgba(0, 0, 0, 0.4);
+            --accent: #0078d4;
+            /* Windows 蓝 */
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+            background: linear-gradient(135deg, #f0f4f8 0%, #e8eef5 50%, #dfe7f0 100%);
+            color: var(--text);
+            font-family: "Noto Sans SC", Segoe UI, system-ui, -apple-system, Roboto, Helvetica, Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            overflow: hidden;
+        }
+
+        #popup-layer {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            /* 允许下层点击通过（初始 modal 期间被遮罩覆盖） */
+        }
+
+        /* 入场弹窗 */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: var(--overlay);
+            display: grid;
+            place-items: center;
+            z-index: 9999;
+        }
+
+        .modal {
+            width: min(92vw, 520px);
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: var(--shadow-heavy);
+            text-align: left;
+            overflow: hidden;
+            animation: modal-appear 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .modal .titlebar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 14px;
+            background: #f3f3f3;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal .titlebar .icon {
+            font-size: 18px;
+        }
+
+        .modal .titlebar .title {
+            font-weight: 700;
+        }
+
+        .modal .content {
+            padding: 16px 16px 8px;
+            color: var(--subtext);
+        }
+
+        .modal .actions {
+            padding: 0 16px 16px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            height: 36px;
+            padding: 0 14px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            font-weight: 600;
+            letter-spacing: .2px;
+            background: #f7f7f7;
+        }
+
+        .btn.primary {
+            background: var(--accent);
+            color: #fff;
+            border-color: #0a6ecf;
+        }
+
+        .btn.secondary {
+            background: #d32f2f; /* 红色背景表示不开心 */
+            color: #fff;
+            border-color: #b22a2a;
+        }
+
+        .btn:hover {
+            filter: brightness(0.98);
+        }
+
+        .btn.primary:hover {
+            filter: brightness(1.05);
+        }
+
+        .btn.secondary:hover {
+            filter: brightness(1.05);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        /* 屏幕弹窗（温馨提示） */
+        .popup {
+            position: absolute;
+            width: 230px;
+            color: var(--text);
+            background: #ffffff;
+            border-radius: 7px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15), 0 8px 32px rgba(0, 0, 0, 0.08);
+            font-size: 13px;
+            line-height: 1.4;
+            pointer-events: none;
+            user-select: none;
+            transform-origin: center;
+            overflow: hidden;
+        }
+
+        .popup .header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            background: #f3f3f3;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .popup .header .icon {
+            font-size: 12px;
+        }
+
+        .popup .header .title {
+            font-weight: 800;
+            font-size: 11px;
+        }
+
+        .popup .content {
+            padding: 6px 10px;
+            color: var(--text);
+            font-size: 18px;
+            font-weight: 600;
+            line-height: 1.25;
+            text-align: center;
+        }
+
+        /* 不同颜色主题的弹窗背景 */
+        .popup.theme-blue .header {
+            background: #e3f2fd;
+            border-bottom-color: #bbdefb;
+        }
+
+        .popup.theme-blue .content {
+            background: #f1f8ff;
+        }
+
+        .popup.theme-green .header {
+            background: #e8f5e9;
+            border-bottom-color: #c8e6c9;
+        }
+
+        .popup.theme-green .content {
+            background: #f1f8f4;
+        }
+
+        .popup.theme-orange .header {
+            background: #fff3e0;
+            border-bottom-color: #ffe0b2;
+        }
+
+        .popup.theme-orange .content {
+            background: #fffaf3;
+        }
+
+        .popup.theme-purple .header {
+            background: #f3e5f5;
+            border-bottom-color: #e1bee7;
+        }
+
+        .popup.theme-purple .content {
+            background: #faf5fc;
+        }
+
+        .popup.theme-pink .header {
+            background: #fce4ec;
+            border-bottom-color: #f8bbd0;
+        }
+
+        .popup.theme-pink .content {
+            background: #fff0f5;
+        }
+
+        .popup.theme-yellow .header {
+            background: #fffde7;
+            border-bottom-color: #fff9c4;
+        }
+
+        .popup.theme-yellow .content {
+            background: #fffef7;
+        }
+
+        .popup.theme-cyan .header {
+            background: #e0f7fa;
+            border-bottom-color: #b2ebf2;
+        }
+
+        .popup.theme-cyan .content {
+            background: #f0fcff;
+        }
+
+        .popup.theme-lime .header {
+            background: #f9fbe7;
+            border-bottom-color: #f0f4c3;
+        }
+
+        .popup.theme-lime .content {
+            background: #fdfef8;
+        }
+
+        .popup.theme-red .header {
+            background: #ffebee;
+            border-bottom-color: #ffcdd2;
+        }
+
+        .popup.theme-red .content {
+            background: #fff5f5;
+        }
+
+        .popup.theme-teal .header {
+            background: #e0f2f1;
+            border-bottom-color: #b2dfdb;
+        }
+
+        .popup.theme-teal .content {
+            background: #f0faf9;
+        }
+
+        .popup.theme-indigo .header {
+            background: #e8eaf6;
+            border-bottom-color: #c5cae9;
+        }
+
+        .popup.theme-indigo .content {
+            background: #f3f4fb;
+        }
+
+        .popup.theme-amber .header {
+            background: #fff8e1;
+            border-bottom-color: #ffecb3;
+        }
+
+        .popup.theme-amber .content {
+            background: #fffef5;
+        }
+
+        .popup.theme-rose .header {
+            background: #fce4ec;
+            border-bottom-color: #f8bbd0;
+        }
+
+        .popup.theme-rose .content {
+            background: #fef5f8;
+        }
+
+        .popup.theme-mint .header {
+            background: #e8f8f5;
+            border-bottom-color: #c8ebe3;
+        }
+
+        .popup.theme-mint .content {
+            background: #f5fcfa;
+        }
+
+        .popup.theme-peach .header {
+            background: #fff0e5;
+            border-bottom-color: #ffe0c7;
+        }
+
+        .popup.theme-peach .content {
+            background: #fffaf5;
+        }
+
+        .popup.theme-lavender .header {
+            background: #f0ebf8;
+            border-bottom-color: #ddd0f0;
+        }
+
+        .popup.theme-lavender .content {
+            background: #f9f6fc;
+        }
+
+        .popup.theme-coral .header {
+            background: #ffe4e1;
+            border-bottom-color: #ffc4bd;
+        }
+
+        .popup.theme-coral .content {
+            background: #fff7f6;
+        }
+
+        .popup.theme-sky .header {
+            background: #e1f5fe;
+            border-bottom-color: #b3e5fc;
+        }
+
+        .popup.theme-sky .content {
+            background: #f0fbff;
+        }
+
+        .popup.theme-lemon .header {
+            background: #fffef0;
+            border-bottom-color: #fff9c8;
+        }
+
+        .popup.theme-lemon .content {
+            background: #fffffa;
+        }
+
+        @media (max-width: 640px) {
+            .popup {
+                width: min(230px, 85vw);
+                font-size: 13px;
+            }
+
+            .popup .content {
+                font-size: 16px;
+            }
+        }
+
+        /* 动画效果 */
+        @keyframes modal-appear {
+            0% {
+                opacity: 0;
+                transform: scale(0.7) translateY(-20px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        /* 从上方弹出 */
+        @keyframes popup-from-top {
+            0% {
+                opacity: 0;
+                transform: scale(0.3) translateY(-60px);
+            }
+
+            60% {
+                opacity: 1;
+                transform: scale(1.08) translateY(0);
+            }
+
+            80% {
+                transform: scale(0.95) translateY(0);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        /* 从下方弹出 */
+        @keyframes popup-from-bottom {
+            0% {
+                opacity: 0;
+                transform: scale(0.3) translateY(60px);
+            }
+
+            60% {
+                opacity: 1;
+                transform: scale(1.08) translateY(0);
+            }
+
+            80% {
+                transform: scale(0.95) translateY(0);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        /* 从左边弹出 */
+        @keyframes popup-from-left {
+            0% {
+                opacity: 0;
+                transform: scale(0.3) translateX(-60px);
+            }
+
+            60% {
+                opacity: 1;
+                transform: scale(1.08) translateX(0);
+            }
+
+            80% {
+                transform: scale(0.95) translateX(0);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1) translateX(0);
+            }
+        }
+
+        /* 从右边弹出 */
+        @keyframes popup-from-right {
+            0% {
+                opacity: 0;
+                transform: scale(0.3) translateX(60px);
+            }
+
+            60% {
+                opacity: 1;
+                transform: scale(1.08) translateX(0);
+            }
+
+            80% {
+                transform: scale(0.95) translateX(0);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1) translateX(0);
+            }
+        }
+
+        /* 从左上角弹出 */
+        @keyframes popup-from-topleft {
+            0% {
+                opacity: 0;
+                transform: scale(0.3) translate(-50px, -50px);
+            }
+
+            60% {
+                opacity: 1;
+                transform: scale(1.08) translate(0, 0);
+            }
+
+            80% {
+                transform: scale(0.95) translate(0, 0);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1) translate(0, 0);
+            }
+        }
+
+        /* 从右上角弹出 */
+        @keyframes popup-from-topright {
+            0% {
+                opacity: 0;
+                transform: scale(0.3) translate(50px, -50px);
+            }
+
+            60% {
+                opacity: 1;
+                transform: scale(1.08) translate(0, 0);
+            }
+
+            80% {
+                transform: scale(0.95) translate(0, 0);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1) translate(0, 0);
+            }
+        }
+
+        /* 从左下角弹出 */
+        @keyframes popup-from-bottomleft {
+            0% {
+                opacity: 0;
+                transform: scale(0.3) translate(-50px, 50px);
+            }
+
+            60% {
+                opacity: 1;
+                transform: scale(1.08) translate(0, 0);
+            }
+
+            80% {
+                transform: scale(0.95) translate(0, 0);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1) translate(0, 0);
+            }
+        }
+
+        /* 从右下角弹出 */
+        @keyframes popup-from-bottomright {
+            0% {
+                opacity: 0;
+                transform: scale(0.3) translate(50px, 50px);
+            }
+
+            60% {
+                opacity: 1;
+                transform: scale(1.08) translate(0, 0);
+            }
+
+            80% {
+                transform: scale(0.95) translate(0, 0);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1) translate(0, 0);
+            }
+        }
+
+        /* 动画类 */
+        .anim-top {
+            animation: popup-from-top 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .anim-bottom {
+            animation: popup-from-bottom 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .anim-left {
+            animation: popup-from-left 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .anim-right {
+            animation: popup-from-right 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .anim-topleft {
+            animation: popup-from-topleft 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .anim-topright {
+            animation: popup-from-topright 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .anim-bottomleft {
+            animation: popup-from-bottomleft 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .anim-bottomright {
+            animation: popup-from-bottomright 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* 右下角透明小球 */
+        #float-balls {
+            position: fixed;
+            right: 30px;
+            bottom: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 10000;
+        }
+
+        .float-ball {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            pointer-events: auto;
+        }
+
+        .float-ball span {
+            color: #1a1a1a;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .float-ball:hover {
+            background: rgba(255, 255, 255, 0.85);
+            transform: scale(1.1);
+            box-shadow: 0 6px 30px rgba(0, 0, 0, 0.25);
+        }
+
+        .float-ball:active {
+            transform: scale(0.95);
+        }
+
+        /* 小球出现动画 */
+        @keyframes ball-appear {
+            0% {
+                opacity: 0;
+                transform: scale(0) translateX(100px);
+            }
+
+            60% {
+                opacity: 1;
+                transform: scale(1.15) translateX(0);
+            }
+
+            80% {
+                transform: scale(0.9) translateX(0);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1) translateX(0);
+            }
+        }
+
+        #float-balls.show .float-ball {
+            animation: ball-appear 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        #float-balls.show .float-ball:nth-child(2) {
+            animation-delay: 0.15s;
+        }
+
+        @media (max-width: 640px) {
+            #float-balls {
+                right: 20px;
+                bottom: 20px;
+                gap: 10px;
+            }
+
+            .float-ball {
+                width: 40px;
+                height: 40px;
+            }
+
+            .float-ball span {
+                font-size: 11px;
+            }
+        }
+        
+        /* 添加按钮容器的样式，使两个按钮水平排列并居中 */
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div class="modal-backdrop" id="start-backdrop" aria-hidden="false">
+            <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+                <div class="titlebar">
+                    <span class="icon">🐷</span>
+                    <span class="title" id="modal-title">你是小猪吗</span>
+                </div>
+                <div class="content">小猪小猪</div>
+                <!-- 修改按钮区域为容器，包含两个对称按钮 -->
+                <div class="button-container">
+                    <button class="btn secondary" id="not-pig-btn">我不是</button>
+                    <button class="btn primary" id="confirm-btn" autofocus>我是</button>
+                </div>
+            </div>
+        </div>
+        <div id="popup-layer" aria-live="polite" aria-atomic="false"></div>
+
+        <!-- 右下角的两个透明小球 -->
+        <div id="float-balls" style="display: none;">
+            <a href="https://pan.quark.cn/s/ed9d639c90b9" target="_blank" class="float-ball" id="ball-more">
+                <span>更多</span>
+            </a>
+        </div>
+    </div>
+
+    <audio id="bgMusic" preload="auto">
+        <source src="https://sf5-hl-cdn-tos.douyinstatic.com/obj/ies-music/7499771397531503370.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        // 不开心的话语数组
+        const unhappyMessages = [
+            "哎呀，又失败了...",
+            "今天也很糟糕呢",
+            "什么都不想做...",
+            "感觉好累啊",
+            "为什么总是这样",
+            "心情不好...",
+            "有点沮丧",
+            "不想说话",
+            "一切都好难",
+            "没人理解我",
+            "好孤单...",
+            "眼泪要掉下来了",
+            "世界好灰暗",
+            "找不到希望",
+            "好想消失...",
+            "为什么会这样对我",
+            "我是不是很没用",
+            "好讨厌这样的自己",
+            "生活真无聊",
+            "好想哭..."
+        ];
+
+        // 原有的积极话语数组（用于"我是"按钮）
+        const positiveMessages = [
+            "你超棒的",
+            "别太累啦，偶尔偷懒也好",
+            "保持微笑呀",
+            "我想你了",
+            "别熬夜",
+            "你很重要",
+            "今天也很努力呢",
+            "你值得被爱",
+            "你是独特的",
+            "相信自己",
+            "一切都会好的",
+            "你已经做得很棒了",
+            "给自己一个拥抱吧",
+            "你的存在很有意义",
+            "你比想象中更勇敢",
+            "每一天都是新的开始",
+            "你的努力我都看在眼里",
+            "你是闪闪发光的",
+            "做你自己就很好",
+            "世界因你而美好"
+        ];
+
+        // 复用原有的主题颜色
+        const themes = [
+            'theme-blue', 'theme-green', 'theme-orange', 'theme-purple',
+            'theme-pink', 'theme-yellow', 'theme-cyan', 'theme-lime',
+            'theme-red', 'theme-teal', 'theme-indigo', 'theme-amber',
+            'theme-rose', 'theme-mint', 'theme-peach', 'theme-lavender',
+            'theme-coral', 'theme-sky', 'theme-lemon'
+        ];
+
+        // 复用原有的动画类型
+        const animations = [
+            'anim-top', 'anim-bottom', 'anim-left', 'anim-right',
+            'anim-topleft', 'anim-topright', 'anim-bottomleft', 'anim-bottomright'
+        ];
+
+        let popupInterval = null;
+        const maxPopups = 100; // 控制弹窗数量
+        let popupCount = 0;
+
+        // 创建弹窗的通用函数
+        function createPopup(messages) {
+            const popupLayer = document.getElementById('popup-layer');
+            const popup = document.createElement('div');
+            popup.className = 'popup ' + themes[Math.floor(Math.random() * themes.length)] + ' ' + animations[Math.floor(Math.random() * animations.length)];
+
+            // 创建弹窗头部
+            const header = document.createElement('div');
+            header.className = 'header';
+            const icon = document.createElement('span');
+            icon.className = 'icon';
+            
+            // 根据消息类型选择表情
+            if (messages === unhappyMessages) {
+                icon.textContent = ['😞', '😢', '😭', '😔', '😫', '😩', '😤', '😡', '😠', '🤬'][Math.floor(Math.random() * 10)];
+            } else {
+                icon.textContent = '💝';
+            }
+            
+            const title = document.createElement('span');
+            title.className = 'title';
+            title.textContent = '提示';
+            header.appendChild(icon);
+            header.appendChild(title);
+
+            // 创建弹窗内容
+            const content = document.createElement('div');
+            content.className = 'content';
+            content.textContent = messages[Math.floor(Math.random() * messages.length)];
+
+            popup.appendChild(header);
+            popup.appendChild(content);
+
+            // 设置随机位置和旋转角度
+            const { innerWidth, innerHeight } = window;
+            const width = 230;
+            const height = 100;
+            const padding = 10;
+
+            const left = Math.max(padding, Math.min(innerWidth - width - padding,
+                Math.random() * (innerWidth - width - padding * 2) + padding));
+            const top = Math.max(padding, Math.min(innerHeight - height - padding,
+                Math.random() * (innerHeight - height - padding * 2) + padding));
+            const rotation = (Math.random() - 0.5) * 20; // 随机旋转-10到10度
+
+            popup.style.left = left + 'px';
+            popup.style.top = top + 'px';
+            popup.style.transform += ' rotate(' + rotation + 'deg)';
+            popup.style.zIndex = String(100 + Math.floor(Math.random() * 100));
+
+            popupLayer.appendChild(popup);
+        }
+
+        // 启动不开心弹窗生成器
+        function startUnhappyPopups() {
+            if (popupInterval) return;
+
+            popupCount = 0;
+            popupInterval = setInterval(() => {
+                if (popupCount >= maxPopups) {
+                    clearInterval(popupInterval);
+                    popupInterval = null;
+                    return;
+                }
+
+                createPopup(unhappyMessages);
+                popupCount++;
+            }, 200);
+        }
+
+        // 启动积极弹窗生成器
+        function startHappyPopups() {
+            if (popupInterval) return;
+
+            popupCount = 0;
+            popupInterval = setInterval(() => {
+                if (popupCount >= maxPopups) {
+                    clearInterval(popupInterval);
+                    popupInterval = null;
+                    return;
+                }
+
+                createPopup(positiveMessages);
+                popupCount++;
+            }, 200);
+        }
+
+        // 处理"我不是"按钮点击事件
+        document.getElementById('not-pig-btn').addEventListener('click', function() {
+            // 关闭模态框
+            const backdrop = document.getElementById('start-backdrop');
+            backdrop.setAttribute('aria-hidden', 'true');
+            backdrop.style.display = 'none';
+
+            // 播放音乐
+            const bgMusic = document.getElementById('bgMusic');
+            bgMusic.volume = 0.6;
+            bgMusic.autoplay = true;
+            bgMusic.play().catch(e => console.log('播放音乐失败:', e));
+
+            // 显示浮动球
+            const floatBalls = document.getElementById('float-balls');
+            if (floatBalls) {
+                floatBalls.style.display = 'flex';
+                setTimeout(() => {
+                    floatBalls.classList.add('show');
+                }, 100);
+            }
+
+            // 启动不开心弹窗生成器
+            startUnhappyPopups();
+        });
+
+        // 处理"我是"按钮点击事件
+        document.getElementById('confirm-btn').addEventListener('click', function() {
+            // 关闭模态框
+            const backdrop = document.getElementById('start-backdrop');
+            backdrop.setAttribute('aria-hidden', 'true');
+            backdrop.style.display = 'none';
+
+            // 播放音乐
+            const bgMusic = document.getElementById('bgMusic');
+            bgMusic.volume = 0.6;
+            bgMusic.autoplay = true;
+            bgMusic.play().catch(e => console.log('播放音乐失败:', e));
+
+            // 显示浮动球
+            const floatBalls = document.getElementById('float-balls');
+            if (floatBalls) {
+                floatBalls.style.display = 'flex';
+                setTimeout(() => {
+                    floatBalls.classList.add('show');
+                }, 100);
+            }
+
+            // 启动积极弹窗生成器
+            startHappyPopups();
+        });
+    </script>
+
+    <script>
+        var _0xodN = 'jsjiami.com.v7';
+        // ... 你原有的混淆代码保持不变 ...
+    </script>
+</body>
+
+</html>
